@@ -2627,8 +2627,18 @@
       renderLocationPhotoGrid(locIdx); debouncedRefresh();
     }
 
-    // ===== 100% OFFLINE AI AUTO-CAPTIONING (TRANSFORMERS.JS) =====
-    let offlineClassifier = null; // Cache the model so it doesn't reload on subsequent clicks
+    // ===== 100% OFFLINE AI AUTO-CAPTIONING (FEW-SHOT K-NN) =====
+    let offlineExtractor = null; 
+    let customKnowledgeBase = null;
+
+    // Helper: Compute Cosine Similarity between two vectors
+    function cosineSimilarity(vecA, vecB) {
+      let dotProduct = 0;
+      for (let i = 0; i < vecA.length; i++) {
+        dotProduct += vecA[i] * vecB[i];
+      }
+      return dotProduct; // Assumes vectors are already normalized
+    }
 
     async function autoCaptionPhotosList(photos) {
       if (!photos || photos.length === 0) {
@@ -2636,29 +2646,34 @@
         return;
       }
 
-      const validCaptions = PREDEFINED_CAPTIONS.filter(c => c && c.trim() !== '');
-      if (validCaptions.length === 0) {
-        showToast('⚠️ No predefined captions available.');
-        return;
-      }
-
       let successCount = 0;
 
       try {
-        if (!offlineClassifier) {
-          showToast(`⚡ Initializing Offline AI Model... (First time download may take a minute)`);
-          // Dynamically import Transformers.js
+        if (!customKnowledgeBase) {
+          showToast(`⚡ Loading Custom AI Knowledge Base...`);
+          try {
+             const res = await fetch('custom_knowledge_base.json');
+             if (res.ok) {
+                 customKnowledgeBase = await res.json();
+             } else {
+                 throw new Error("Not found");
+             }
+          } catch(e) {
+             showToast(`⚠️ custom_knowledge_base.json not found! Please build it first.`);
+             return;
+          }
+        }
+
+        if (!offlineExtractor) {
+          showToast(`⚡ Initializing Offline AI Vision Model... (First time may take a minute)`);
           const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
           
-          // Force download from CDN and cache in browser
           env.allowLocalModels = false;
           env.useBrowserCache = true;
 
-          // Load the zero-shot image classification pipeline using CLIP
-          offlineClassifier = await pipeline('zero-shot-image-classification', 'Xenova/clip-vit-base-patch32', {
+          offlineExtractor = await pipeline('image-feature-extraction', 'Xenova/clip-vit-base-patch32', {
             progress_callback: x => {
               if (x.status === 'progress' && x.progress !== undefined) {
-                // Update toast with download progress
                 const p = document.getElementById('toast');
                 if (p) {
                    p.innerHTML = `⬇️ Downloading AI model: ${Math.round(x.progress)}%`;
@@ -2670,41 +2685,54 @@
           showToast(`✅ Offline AI Model Ready!`);
         }
 
-        // Process images one by one
         for (let i = 0; i < photos.length; i++) {
           const photo = photos[i];
           showToast(`⚡ Analyzing photo ${i + 1} of ${photos.length} (100% Offline)...`);
           
-          // Ensure we have a valid data URL
           let imageUrl = photo.dataUrl;
           if (!imageUrl) {
             imageUrl = await getPhotoBase64(photo);
           }
           
-          // Run zero-shot classification
-          const results = await offlineClassifier(imageUrl, validCaptions);
+          // Extract embedding for new photo
+          const output = await offlineExtractor(imageUrl);
+          const embedding = Array.from(output.data);
           
-          if (results && results.length > 0) {
-            // The first result has the highest score/probability
-            const bestMatch = results[0].label;
-            photo.caption = bestMatch;
+          // Normalize embedding
+          let sumSq = 0;
+          for(let j=0; j<embedding.length; j++) sumSq += embedding[j]*embedding[j];
+          let norm = Math.sqrt(sumSq);
+          let normalized = embedding.map(x => x / norm);
+          
+          // Find closest match in custom knowledge base
+          let bestCaption = "";
+          let bestScore = -1;
+          
+          for(const item of customKnowledgeBase) {
+             const score = cosineSimilarity(normalized, item.embedding);
+             if (score > bestScore) {
+                 bestScore = score;
+                 bestCaption = item.caption;
+             }
+          }
+          
+          if (bestCaption) {
+            // Clean up the caption slightly (in case it extracted bullet points etc)
+            photo.caption = bestCaption.replace(/^[\s\-\*\•]+/, '').trim();
             successCount++;
           }
           
-          // Let the UI breathe so it doesn't freeze completely
           await new Promise(resolve => setTimeout(resolve, 50));
         }
 
-        // Refresh UI
         state.photoLocations.forEach((_, locIdx) => renderLocationPhotoGrid(locIdx));
         debouncedRefresh();
-        showToast(`✨ Successfully auto-captioned ${successCount} photos offline!`);
+        showToast(`✨ Successfully auto-captioned ${successCount} photos using Custom AI!`);
 
       } catch (err) {
         console.error("Offline AI Error:", err);
         showToast(`⚠️ Offline AI Error: ${err.message}`);
-        // Reset classifier in case of severe corruption
-        offlineClassifier = null;
+        offlineExtractor = null;
       }
     }
 
