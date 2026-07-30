@@ -1,0 +1,20 @@
+# Exclude large document folders
+New folder/
+new/
+neww/
+MONTHLY REPORT JUNE 2026/
+MONTHLY REPORT APRIL 2026/
+test.zip
+*.ps1
+
+# Python
+.venv/
+venv/
+__pycache__/
+
+# Node
+node_modules/
+
+# Exclude raw dataset images, but keep the training scripts
+offline_training/dataset/img_*.jpg
+offline_training/dataset/dataset.json
