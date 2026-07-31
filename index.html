@@ -2652,11 +2652,12 @@
           env.useBrowserCache = true;
 
           offlineExtractor = await pipeline('zero-shot-image-classification', 'Xenova/clip-vit-base-patch32', {
+            quantized: false,
             progress_callback: x => {
               if (x.status === 'progress' && x.progress !== undefined) {
                 const p = document.getElementById('toast');
                 if (p) {
-                  p.innerHTML = `⬇️ Downloading AI model: ${Math.round(x.progress)}%`;
+                  p.innerHTML = `⬇️ Downloading Full AI Model (${x.file}): ${Math.round(x.progress)}%`;
                   p.className = 'toast show';
                 }
               }
