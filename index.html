@@ -1869,22 +1869,31 @@
             <input type="text" class="section-title-input" id="photosTitle" value="PHOTOGRAPHS">
 
             <!-- AI Auto-Captioning Control Panel -->
-            <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(236, 72, 153, 0.08)); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
-                <div style="font-size: 13px; font-weight: 600; color: #e6edf3; display: flex; align-items: center; gap: 6px;">
+            <div
+              style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(236, 72, 153, 0.08)); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                <div
+                  style="font-size: 13px; font-weight: 600; color: #e6edf3; display: flex; align-items: center; gap: 6px;">
                   <span>✨ AI Auto-Captioning</span>
-                  <span style="font-size: 10px; background: #8b5cf6; color: #ffffff; padding: 2px 6px; border-radius: 10px; font-weight: normal;">100% Offline</span>
+                  <span
+                    style="font-size: 10px; background: #8b5cf6; color: #ffffff; padding: 2px 6px; border-radius: 10px; font-weight: normal;">100%
+                    Offline</span>
                 </div>
               </div>
               <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center;">
-      <div class="api-key-container" style="display: flex; align-items: center; justify-content: center; background: rgba(46, 160, 67, 0.1); border-color: var(--accent); padding: 12px; border-radius: var(--radius); width: 100%;">
-        <span style="font-size: 1.2rem; margin-right: 10px;">⚡</span>
-        <div>
-          <strong style="color: var(--accent-light);">100% Offline AI Enabled</strong>
-          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Zero-Shot Vision Model runs entirely on your device. No API keys or rate limits.</div>
-        </div>
-      </div>
-                <button class="btn" style="background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; padding: 7px 14px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600; box-shadow: 0 2px 10px rgba(139,92,246,0.3);" onclick="autoCaptionAllPhotos()">
+                <div class="api-key-container"
+                  style="display: flex; align-items: center; justify-content: center; background: rgba(46, 160, 67, 0.1); border-color: var(--accent); padding: 12px; border-radius: var(--radius); width: 100%;">
+                  <span style="font-size: 1.2rem; margin-right: 10px;">⚡</span>
+                  <div>
+                    <strong style="color: var(--accent-light);">100% Offline AI Enabled</strong>
+                    <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Zero-Shot Vision Model
+                      runs entirely on your device. No API keys or rate limits.</div>
+                  </div>
+                </div>
+                <button class="btn"
+                  style="background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; padding: 7px 14px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 600; box-shadow: 0 2px 10px rgba(139,92,246,0.3);"
+                  onclick="autoCaptionAllPhotos()">
                   <span>✨ Auto-Caption All Photos</span>
                 </button>
               </div>
@@ -2081,9 +2090,7 @@
       'Green Shade Net Service for Plants',
       'Installation of Terram Sheet',
       'Irrigation Maintenance Check',
-      'LAWN EDGING',
       'Lawn Edging',
-      'LAWN MOWING',
       'Lawn Mowing',
       'Manual Watering',
       'Manual Watering After Planting',
@@ -2113,10 +2120,8 @@
       'Replacement of Groundcovers (Wedelia)',
       'Replacement of Seasonal Flowers (Petunia)',
       'Replacement of Seasonal Flowers (Vinca)',
-      'SELECTIVE PRUNING',
       'Selective Pruning',
       'Soil Cultivation',
-      'SPRINKLING OF WATER',
       'Sprinkling of Water',
       'Tree Pruning',
       'Trimming Activity',
@@ -2628,17 +2633,7 @@
     }
 
     // ===== 100% OFFLINE AI AUTO-CAPTIONING (FEW-SHOT K-NN) =====
-    let offlineExtractor = null; 
-    let customKnowledgeBase = null;
-
-    // Helper: Compute Cosine Similarity between two vectors
-    function cosineSimilarity(vecA, vecB) {
-      let dotProduct = 0;
-      for (let i = 0; i < vecA.length; i++) {
-        dotProduct += vecA[i] * vecB[i];
-      }
-      return dotProduct; // Assumes vectors are already normalized
-    }
+    let offlineExtractor = null;
 
     async function autoCaptionPhotosList(photos) {
       if (!photos || photos.length === 0) {
@@ -2649,35 +2644,20 @@
       let successCount = 0;
 
       try {
-        if (!customKnowledgeBase) {
-          showToast(`⚡ Loading Custom AI Knowledge Base...`);
-          try {
-             const res = await fetch('custom_knowledge_base.json');
-             if (res.ok) {
-                 customKnowledgeBase = await res.json();
-             } else {
-                 throw new Error("Not found");
-             }
-          } catch(e) {
-             showToast(`⚠️ custom_knowledge_base.json not found! Please build it first.`);
-             return;
-          }
-        }
-
         if (!offlineExtractor) {
-          showToast(`⚡ Initializing Offline AI Vision Model... (First time may take a minute)`);
+          showToast(`⚡ Initializing Zero-Shot AI Vision Model... (First time may take a minute)`);
           const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
-          
+
           env.allowLocalModels = false;
           env.useBrowserCache = true;
 
-          offlineExtractor = await pipeline('image-feature-extraction', 'Xenova/clip-vit-base-patch32', {
+          offlineExtractor = await pipeline('zero-shot-image-classification', 'Xenova/clip-vit-base-patch32', {
             progress_callback: x => {
               if (x.status === 'progress' && x.progress !== undefined) {
                 const p = document.getElementById('toast');
                 if (p) {
-                   p.innerHTML = `⬇️ Downloading AI model: ${Math.round(x.progress)}%`;
-                   p.className = 'toast show';
+                  p.innerHTML = `⬇️ Downloading AI model: ${Math.round(x.progress)}%`;
+                  p.className = 'toast show';
                 }
               }
             }
@@ -2685,43 +2665,25 @@
           showToast(`✅ Offline AI Model Ready!`);
         }
 
+        const validCaptions = PREDEFINED_CAPTIONS.filter(c => c.trim() !== '');
+
         for (let i = 0; i < photos.length; i++) {
           const photo = photos[i];
-          showToast(`⚡ Analyzing photo ${i + 1} of ${photos.length} (100% Offline)...`);
-          
+          showToast(`⚡ Analyzing photo ${i + 1} of ${photos.length} (100% Offline Zero-Shot)...`);
+
           let imageUrl = photo.dataUrl;
           if (!imageUrl) {
             imageUrl = await getPhotoBase64(photo);
           }
+
+          // Run zero-shot classification
+          const result = await offlineExtractor(imageUrl, validCaptions);
           
-          // Extract embedding for new photo
-          const output = await offlineExtractor(imageUrl);
-          const embedding = Array.from(output.data);
-          
-          // Normalize embedding
-          let sumSq = 0;
-          for(let j=0; j<embedding.length; j++) sumSq += embedding[j]*embedding[j];
-          let norm = Math.sqrt(sumSq);
-          let normalized = embedding.map(x => x / norm);
-          
-          // Find closest match in custom knowledge base
-          let bestCaption = "";
-          let bestScore = -1;
-          
-          for(const item of customKnowledgeBase) {
-             const score = cosineSimilarity(normalized, item.embedding);
-             if (score > bestScore) {
-                 bestScore = score;
-                 bestCaption = item.caption;
-             }
-          }
-          
-          if (bestCaption) {
-            // Clean up the caption slightly (in case it extracted bullet points etc)
-            photo.caption = bestCaption.replace(/^[\s\-\*\•]+/, '').trim();
+          if (result && result.length > 0) {
+            photo.caption = result[0].label;
             successCount++;
           }
-          
+
           await new Promise(resolve => setTimeout(resolve, 50));
         }
 
@@ -4605,7 +4567,7 @@
           const src = img.getAttribute('src');
           if (src && src.startsWith('data:')) {
             let caption = '';
-            
+
             // Check if image is in a table cell (our export format)
             const td = img.closest('td');
             if (td) {
@@ -4623,7 +4585,7 @@
                 }
               }
             }
-            
+
             // Fallback for linear layouts
             if (!caption) {
               const nextEl = img.nextElementSibling || img.parentElement?.nextElementSibling;
@@ -4634,7 +4596,7 @@
                 }
               }
             }
-            
+
             data.photos.push({ dataUrl: src, caption });
           }
         });
